@@ -39,6 +39,7 @@ namespace EditableTextBox_Demo.ViewModel
     {
         public string QueryString { get; set; }
         public Dictionary<string, string> ReplaceList { get; set; }
+        private string ErrorText = "Please enter a valid query in the QueryTextBox";
 
         private string _snippetText;
         public string SnippetText
@@ -97,7 +98,7 @@ namespace EditableTextBox_Demo.ViewModel
         private void Find(EditableTextBox tb)
         {
             if (string.IsNullOrEmpty(QueryString))
-                MessageBox.Show("Enter a query");
+                MessageBox.Show(ErrorText, "Invalid entry", MessageBoxButton.OK, MessageBoxImage.Error);
             else
             {
                 int idx = tb.Find(QueryString, true);
@@ -112,7 +113,7 @@ namespace EditableTextBox_Demo.ViewModel
         private void FindAll(EditableTextBox tb, List<int> ints, StringBuilder sb)
         {
             if (string.IsNullOrEmpty(QueryString))
-                MessageBox.Show("Enter a query");
+                MessageBox.Show(ErrorText, "Invalid entry", MessageBoxButton.OK, MessageBoxImage.Error);
             else
             {
                 ints = tb.FindAll(QueryString);
@@ -123,6 +124,37 @@ namespace EditableTextBox_Demo.ViewModel
 
                     Result = sb.ToString();
                 }
+            }
+        }
+
+        private void FindAllRegex(EditableTextBox tb, StringBuilder sb)
+        {
+            List<FindCollection> list;
+            string str;
+            string rstr;
+
+            if (string.IsNullOrEmpty(QueryString))
+            {
+                MessageBox.Show(ErrorText, "Invalid entry", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                list = tb.FindAllRegex(QueryString);
+                foreach (FindCollection fc in list)
+                {
+                    str = fc.FoundStr.Substring(1, fc.FoundStr.Length - 2);
+                    sb.Append("Index: " + fc.Index);
+                    sb.Append(", String: " + fc.FoundStr);
+                    sb.Append(", Length: " + fc.Length);
+                    sb.Append(Environment.NewLine);
+                }
+                Result = sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Invalid Regex: " + ex.Message, "Invalid entry", MessageBoxButton.OK,MessageBoxImage.Error);
             }
         }
 
@@ -162,31 +194,6 @@ namespace EditableTextBox_Demo.ViewModel
                 sb.Append(Environment.NewLine);
             }
             Result = sb.ToString();
-        }
-
-        private void FindAllRegex(EditableTextBox tb, StringBuilder sb)
-        {
-            List<FindCollection> list;
-            string str;
-            string rstr;
-
-            try
-            {
-                list = tb.FindAllRegex(QueryString);
-                foreach (FindCollection fc in list)
-                {
-                    str = fc.FoundStr.Substring(1, fc.FoundStr.Length - 2);
-                    sb.Append("Index: " + fc.Index);
-                    sb.Append(", String: " + fc.FoundStr);
-                    sb.Append(", Length: " + fc.Length);
-                    sb.Append(Environment.NewLine);
-                }
-                Result = sb.ToString();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("I'm assuing an invalid Regex: " + ex.Message);
-            }
         }
     }
 }
